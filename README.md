@@ -6,3 +6,9 @@ Guide pour effectuer des déploiement sur un serveur vps
 
 > ssh user@ip_du_serveur
 
+
+#### Générer une paire de clé
+```typeScript
+ssh-keygen -t rsa -b 2048
+```
+
