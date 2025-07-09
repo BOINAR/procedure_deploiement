@@ -106,6 +106,22 @@ tonapp.domaine.com {
 }
 ```
 
+```.env
+# .env
+
+# PostgreSQL
+POSTGRES_DB=mydb
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=mysecretpassword
+
+# Backend
+DATABASE_URL=postgres://postgres:mysecretpassword@db:5432/mydb
+
+# Ports
+FRONTEND_PORT=3000
+BACKEND_PORT=4000
+```
+
 #### contenu du docker compose
 ```yaml
 services:
