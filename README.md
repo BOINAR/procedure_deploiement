@@ -198,29 +198,41 @@ networks:
 
 #### Fichier GitHub Actions .github/workflows/deploy.yml
 ```yaml
-name: Deploy to VPS
+name: Deploy
 
 on:
   push:
     branches: [main]
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+env:
+  REGISTRY: ghcr.io
+  IMAGE_FRONTEND: ghcr.io/tonuser/frontend
+  IMAGE_BACKEND: ghcr.io/tonuser/backend
 
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to GHCR
+      - name: Login to GHCR
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ghcr.io/${{ github.repository }}:latest .
+      - name: Build and push frontend
+        run: |
+          docker build -t $IMAGE_FRONTEND:latest ./frontend
+          docker push $IMAGE_FRONTEND:latest
 
-      - name: Push Docker image
-        run: docker push ghcr.io/${{ github.repository }}:latest
+      - name: Build and push backend
+        run: |
+          docker build -t $IMAGE_BACKEND:latest ./backend
+          docker push $IMAGE_BACKEND:latest
 
+  deploy-to-vps:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
