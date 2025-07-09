@@ -45,20 +45,39 @@ adduser deployer
 usermod -aG docker deployer
 ```
 
-# 🚀 Procédure de déploiement d'application sur un VPS avec Docker, GHCR, GitHub Actions et Caddy
-
-## ✅ Stack technique validée
-
-| Élément               | Choix retenu                            |
-|-----------------------|-----------------------------------------|
-| CI/CD                 | GitHub Actions                         |
-| Build d’image Docker  | Dockerfile                             |
-| Registry Docker       | GitHub Container Registry (GHCR)       |
-| Déploiement VPS       | `docker compose pull && up -d`         |
-| Source sur le VPS     | ❌ Aucun (uniquement artefacts Docker) |
-| Reverse Proxy + HTTPS | Caddy avec certificats auto Let's Encrypt |
+# 🚀 Déploiement automatisé d'une application Dockerisée sur VPS  
+**via GitHub Actions + GHCR + Docker Compose + Caddy**
 
 ---
+
+## ✅ Stack technique
+
+| Élément                         | Technologie utilisée                          |
+|---------------------------------|-----------------------------------------------|
+| CI/CD                           | GitHub Actions                                |
+| Registry Docker                 | GitHub Container Registry (GHCR)              |
+| Build de l'app                  | Dockerfile (dans le dépôt source)             |
+| Déploiement sur VPS             | docker compose pull && up -d                  |
+| Reverse Proxy + HTTPS           | Caddy (via conteneur Docker)                  |
+| Code source sur le VPS          | ❌ Aucun — uniquement artefacts Docker        |
+
+---
+
+## 🧰 Prérequis
+
+- Un VPS avec Ubuntu 20.04+ ou Debian
+- Un nom de domaine pointant vers l’IP du VPS (ex. `tonapp.domaine.com`)
+- Un dépôt GitHub contenant le code source et un `Dockerfile`
+- GitHub Actions activé
+- Un token GitHub (`GHCR_PAT`) avec les scopes `write:packages` et `read:packages`
+
+---
+
+## ⚙️ 1. Configuration initiale du VPS
+
+### 🔐 Connexion SSH
+```bash
+ssh deployer@<IP_DU_SERVEUR>
 
 ## 📦 1. Préparation du VPS
 
