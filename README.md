@@ -108,17 +108,49 @@ tonapp.domaine.com {
 
 #### contenu du docker compose
 ```yaml
-version: "3.8"
-
 services:
-  web:
-    image: ghcr.io/tonuser/tonapp:latest
-    container_name: tonapp
+  frontend:
+    image: ghcr.io/tonuser/frontend:latest
+    container_name: frontend
     expose:
-      - "3000"
+      - "${FRONTEND_PORT}"
+    restart: always
     networks:
       - app_net
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  backend:
+    image: ghcr.io/tonuser/backend:latest
+    container_name: backend
+    expose:
+      - "${BACKEND_PORT}"
     restart: always
+    networks:
+      - app_net
+    depends_on:
+      - db
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${BACKEND_PORT}/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  db:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app_net
+    env_file:
+      - .env
 
   caddy:
     image: caddy:latest
@@ -135,6 +167,7 @@ services:
       - app_net
 
 volumes:
+  pgdata:
   caddy_data:
   caddy_config:
 
@@ -179,6 +212,16 @@ jobs:
             docker compose pull
             docker compose up -d
 ```
+
+#### Commandes utiles à exécuter manuellement sur le serveur
+```zsh
+docker compose pull         # Met à jour l'image depuis GHCR
+docker compose up -d        # Relance l’application
+docker compose down         # Stoppe et supprime les conteneurs
+docker image prune -a       # Supprime les anciennes images inutilisées
+```
+
+
 
 
 
