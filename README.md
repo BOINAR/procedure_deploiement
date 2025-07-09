@@ -101,8 +101,12 @@ ufw enable
 
 #### configuration du caddyfile
 ```zsh
-tonapp.domaine.com {
-    reverse_proxy web:3000
+app.mondomaine.com {
+    reverse_proxy frontend:${FRONTEND_PORT}
+}
+
+api.mondomaine.com {
+    reverse_proxy backend:${BACKEND_PORT}
 }
 ```
 
