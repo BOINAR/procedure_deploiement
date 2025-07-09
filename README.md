@@ -142,6 +142,44 @@ networks:
   app_net:
 ```
 
+#### Fichier GitHub Actions .github/workflows/deploy.yml
+```yaml
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ghcr.io/${{ github.repository }}:latest .
+
+      - name: Push Docker image
+        run: docker push ghcr.io/${{ github.repository }}:latest
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker login ghcr.io -u ${{ github.actor }} --password ${{ secrets.GHCR_PAT }}
+            cd ~/apps/ton-app
+            docker compose pull
+            docker compose up -d
+```
+
 
 
 
