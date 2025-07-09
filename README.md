@@ -110,6 +110,48 @@ api.mondomaine.com {
 }
 ```
 
+#### Dockerfile frontend
+```yaml
+# frontend/Dockerfile
+
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/.next .next
+COPY --from=builder /app/public public
+COPY --from=builder /app/package.json .
+RUN npm install --omit=dev
+
+EXPOSE 8080
+CMD ["npm", "start"]
+```
+#### Dockerfile backend
+```yaml
+# backend/Dockerfile
+
+# Étape 1 : build NestJS
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+
+# Étape 2 : image minimale
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json .
+RUN npm install --omit=dev
+
+EXPOSE 3000
+CMD ["node", "dist/main.js"]
+```
+
 #### Fichier .env
 ```.env
 # .env
